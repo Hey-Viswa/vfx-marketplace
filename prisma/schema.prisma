@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // Change to your database (e.g., "mysql" or "mongodb")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+model User {
+  id           Int    @id @default(autoincrement())
+  email        String @unique
+  passwordHash String
+  role         Role   @default(USER)
+
+  // Relationships
+  assets  Asset[] // A user can upload/sell many assets
+  orders  Order[] // A user can buy many things
+  reviews Review[] // A user can write many reviews
+
+  // A user can send and receive many messages
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+}
+
+model Asset {
+  id      Int    @id @default(autoincrement())
+  title   String
+  price   Float
+  fileUrl String
+
+  // Foreign Key
+  sellerId Int
+  seller   User @relation(fields: [sellerId], references: [id])
+
+  // Relationships
+  orders  Order[] // An asset can be purchased many times
+  reviews Review[] // An asset can have many reviews
+}
+
+model Order {
+  id     Int    @id @default(autoincrement())
+  amount Float
+  status String // You could make this an Enum too (e.g., PENDING, COMPLETED)
+
+  // Foreign Keys
+  buyerId Int
+  buyer   User @relation(fields: [buyerId], references: [id])
+
+  assetId Int
+  asset   Asset @relation(fields: [assetId], references: [id])
+}
+
+model Review {
+  id      Int    @id @default(autoincrement())
+  rating  Int
+  comment String
+
+  // Foreign Keys
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  assetId Int
+  asset   Asset @relation(fields: [assetId], references: [id])
+}
+
+model Message {
+  id      Int    @id @default(autoincrement())
+  content String
+
+  // Foreign Keys
+  senderId Int
+  sender   User @relation("SentMessages", fields: [senderId], references: [id])
+
+  receiverId Int
+  receiver   User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+}
