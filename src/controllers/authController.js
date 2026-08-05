@@ -1,5 +1,6 @@
 import UserModel from '../models/userModel.js';
 import bcrypt from 'bcrypt';
+import { generateToken } from '../utils/jwt.js';
 
 class AuthController {
   static async register(req, res) {
@@ -18,6 +19,7 @@ class AuthController {
         userId: newUser.id,
       });
     } catch (error) {
+      console.log("REGISTER ERROR:", error);
       return res.status(500).json({
         error: 'Server error',
       });
@@ -41,9 +43,10 @@ class AuthController {
           message: 'Invalid Credentials',
         });
       }
+      const token = generateToken(getUser.id);
       return res.status(200).json({
         message: 'Login successful',
-        userId: getUser.id,
+        token: token,
       });
     } catch (e) {
       return res.status(500).json({

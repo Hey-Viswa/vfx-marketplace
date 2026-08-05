@@ -2,22 +2,20 @@ import prisma from '../config/db.js';
 
 class UserModel {
   static async findUserByEmail(email) {
-    const user = await prisma.user.findUnique({
+    return await prisma.user.findUnique({
       where: {
         email,
       },
     });
-    return user;
   }
 
   static async createUser(email, passwordHash) {
-    const newUser = await prisma.user.createUser({
+    return await prisma.user.create({
       data: {
         email: email,
         passwordHash: passwordHash,
       },
     });
-    return newUser;
   }
 }
 
