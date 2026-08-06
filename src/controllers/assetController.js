@@ -5,7 +5,6 @@ export const createAsset = async (req, res) => {
     const { title, price } = req.body;
     const file = req.file;
 
-
     if (!file || !title || !price) {
       return res.status(400).json({
         error: 'File not found',
@@ -41,7 +40,6 @@ export const getAllAssets = async (req, res) => {
           },
         },
       },
-
     });
     res.status(200).json(assets);
   } catch (e) {
@@ -49,5 +47,43 @@ export const getAllAssets = async (req, res) => {
     res.status(500).json({
       error: 'Failed to get all assets',
     });
+  }
+};
+
+export const updateAsset = async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { title, price } = req.body;
+
+    const findAsset = await prisma.asset.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (!findAsset) {
+      return res.status(404).json({
+        error: 'No such asset found.',
+      });
+    }
+
+    // Compare the sellerId from the database with the logged-in user's ID
+    if (findAsset.sellerId !== req.user.userId) {
+      return res
+        .status(403)
+        .json({ message: 'Not authorized to edit this asset' });
+    }
+
+    const updateAsset = await prisma.asset.update({
+      where: {
+        id: id,
+      },
+      data: {
+        title: title,
+        price: parseFloat(price),
+      },
+    });
+    return res.status(200).json(updateAsset);
+  } catch (e) {
+    return res.status(500).json({ error: 'Failed to update asset!' });
   }
 };
