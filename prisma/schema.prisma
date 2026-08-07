@@ -32,6 +32,7 @@ model Asset {
   title   String
   price   Float
   fileUrl String
+  isActive Boolean @default(true)
 
   // Foreign Key
   sellerId Int
@@ -45,7 +46,8 @@ model Asset {
 model Order {
   id     Int    @id @default(autoincrement())
   amount Float
-  status String // You could make this an Enum too (e.g., PENDING, COMPLETED)
+  status String @default("Pending") // You could make this an Enum too (e.g., PENDING, COMPLETED)
+  stripeSessionId String? @unique
 
   // Foreign Keys
   buyerId Int

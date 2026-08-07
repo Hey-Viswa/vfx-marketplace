@@ -2,6 +2,7 @@ import express from 'express';
 import upload from '../middlewares/uploadMiddleware.js';
 import {
   createAsset,
+  deleteAsset,
   getAllAssets,
   updateAsset,
 } from '../controllers/assetController.js';
@@ -15,5 +16,7 @@ router.get('/', getAllAssets);
 router.post('/', requireAuth, upload.single('file'), createAsset);
 
 router.put('/:id', requireAuth, updateAsset);
+
+router.delete('/:id', requireAuth, deleteAsset);
 
 export default router;

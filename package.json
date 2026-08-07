@@ -27,6 +27,7 @@
     "postcss": "^8.5.25",
     "rollup": "^4.62.4",
     "source-map-js": "^1.2.1",
+    "stripe": "^22.4.0",
     "tsx": "^4.23.8"
   },
   "devDependencies": {
