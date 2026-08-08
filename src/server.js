@@ -1,11 +1,24 @@
-import app from './app.js';
-import http from 'http';
-import { initializeSocket } from './socket.js';
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
 
-// 1. Wrap the Express app in a raw Node HTTP server
-const httpServer = http.createServer(app);
+dotenv.config();
 
-initializeSocket(httpServer);
-httpServer.listen(3000, () => {
-  console.log('Server (with WebSockets) is running on http://localhost:3000');
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Middleware
+app.use(express.json());
+app.use(cors());
+
+// Health Check Route
+app.get('/api/health', (req, res) => {
+  res
+    .status(200)
+    .json({ message: 'VFX Marketplace API is running with ES6 Modules!' });
+});
+
+// Start Server
+app.listen(PORT, () => {
+  console.log(`Server is locked and loaded on port ${PORT}`);
 });

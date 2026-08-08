@@ -1,5 +1,6 @@
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
+import prisma from './config/db';
 export const initializeSocket = (httpServer) => {
   const io = new Server(httpServer, {
     cors: {
@@ -28,12 +29,26 @@ export const initializeSocket = (httpServer) => {
       const { receiverId, content } = data;
       const senderId = socket.user.userId;
 
-      io.to(`user_${receiverId}`).emit('receiveMessage', {
-        senderId,
-        content,
-        timestamp: new Date()
-      });
-      console.log(`Live Message: ${senderId} -> ${receiverId}`);
+      try {
+        const savedMessage = await prisma.message.create({
+          data: {
+            senderId: parseInt(senderId),
+            receiverId: parseInt(receiverId),
+            content: content,
+          },
+        });
+        io.to(`user_${receiverId}`).emit('receiveMessage', {
+          id: savedMessage.id, // <-- [NEW] Added DB ID
+          senderId,
+          content,
+          timestamp: new Date(),
+        });
+
+        console.log(`Live Message Saved & Sent:
+  ${senderId} -> ${receiverId}`);
+      } catch (error) {
+        console.error("Failed to save message to DB:", error);
+      }
     });
     socket.on('disconnect', () => {
       console.log(`User ${socket.user.userId} disconnected!`);

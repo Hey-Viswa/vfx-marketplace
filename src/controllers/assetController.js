@@ -121,3 +121,38 @@ export const deleteAsset = async (req, res) => {
     return res.status(500).json({ error: 'Failed to update asset!' });
   }
 };
+
+export const downloadAsset = async (req, res) => {
+  try {
+    const assetId = parseInt(req.params.id);
+    const { userId } = req.user;
+
+    const order = await prisma.order.findFirst({
+      where: {
+        buyerId: userId,
+        assetId: assetId,
+        status: 'COMPLETED',
+      },
+    });
+    if (!order) {
+      return res.status(403).json({
+        error:
+          'Forbidden!. You have not purchased this asset of your payment is still pending.',
+      });
+    }
+    const asset = await prisma.asset.findUnique({
+      where: {
+        id: assetId,
+      },
+    });
+    if (!asset || !asset.fileUrl) {
+      return res.status(404).json({ error: 'Asset file not found!' });
+    }
+    return res.download(asset.fileUrl);
+  } catch (e) {
+    return res.status(500).json({
+      error: 'Failed to download asset!',
+      message: e.message,
+    });
+  }
+};
